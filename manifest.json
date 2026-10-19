@@ -1,13 +1,14 @@
 {
   "name": "GymMaster CRM",
   "short_name": "GymMaster",
-  "start_url": "./index.html",
+  "start_url": "/game-ping-pong-for-2-players-on-Python",
+  "scope": "/game-ping-pong-for-2-players-on-Python/",
   "display": "standalone",
   "background_color": "#313338",
   "theme_color": "#313338",
   "icons": [
     {
-      "src": "images.jpeg",
+      "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
