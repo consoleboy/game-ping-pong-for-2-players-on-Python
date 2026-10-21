@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>GymMaster CRM</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GymMaster">
+
+<style>
+:root {
+    --bg-main: #313338;
+    --bg-card: #2B2D31;
+    --bg-input: #1E1F22;
+    --blurple: #5865F2;
+    --text-main: #F2F3F5;
+    --text-muted: #949BA4;
+    --green: #23A55A;
+    --red: #F23F43;
+    --yellow: #F0B232;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+    margin: 0;
+    padding: 20px 0 90px 0;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.screen { display: none; padding: 20px; animation: fadeIn 0.2s ease-in-out; }
+.screen.active { display: block; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2, h3 { margin-top: 0; font-weight: 700; }
+.muted { color: var(--text-muted); font-size: 13px; }
+
+.card {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.form-group { margin-bottom: 16px; display: flex; flex-direction: column; }
+
+.form-group label {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input, textarea, select {
+    background-color: var(--bg-input);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--text-main);
+    font-size: 16px;
+    width: 100%;
+    outline: none;
+    transition: border 0.2s;
+}
+
+input:focus, textarea:focus, select:focus { border-color: var(--blurple); }
+
+.btn {
+    background-color: var(--blurple);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    width: 100%;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s;
+}
+
+.btn:active { background-color: #4752C4; }
+.btn-secondary { background-color: #4E5058; }
+.btn-secondary:active { background-color: #3c3e44; }
+
+.btn-danger {
+    background-color: transparent;
+    color: var(--red);
+    border: 1px solid var(--red);
+    font-size: 13px;
+    padding: 8px;
+    margin-top: 10px;
+    width: 100%;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-danger:active { background-color: rgba(242, 63, 67, 0.1); }
+
+.action-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+    margin-left: 8px;
+}
+.action-btn:hover { color: var(--text-main); }
+.action-btn.delete:hover { color: var(--red); }
+
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 12px 0;
+}
+
+.item-row:last-child { border-bottom: none; }
+
+.badge {
+    font-size: 11px;
+    font-weight: bold;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge.paid { background-color: rgba(35, 165, 90, 0.15); color: var(--green); }
+.badge.debt { background-color: rgba(242, 63, 67, 0.15); color: var(--red); }
+.badge.guest { background-color: rgba(240, 178, 50, 0.15); color: var(--yellow); }
+.badge.guest-fail { background-color: rgba(148, 155, 164, 0.15); color: var(--text-muted); }
+.badge.cash { background-color: rgba(88, 101, 242, 0.15); color: var(--blurple); }
+
+.install-restrict-banner {
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.restrict-error { background-color: rgba(242, 63, 67, 0.15); color: var(--red); }
+.restrict-success { background-color: rgba(35, 165, 90, 0.15); color: var(--green); }
+
+.tabbar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 75px;
+    background-color: var(--bg-card);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 1000;
+}
+
+.tab-item {
+    color: var(--text-muted);
+    font-size: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer;
+    flex: 1;
+    height: 100%;
+    justify-content: center;
+}
+
+.tab-item.active { color: var(--text-main); font-weight: bold; }
+.tab-icon { font-size: 20px; margin-bottom: 4px; }
+
+.help-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-main);
+    margin-bottom: 12px;
+}
+</style>
+</head>
+<body>
+
+<!-- ЭКРАН 1: КЛИЕНТЫ -->
+<div id="screen-clients" class="screen active">
+    <h2>База клиентов</h2>
+    <div class="form-group">
+        <input type="text" id="search-input" placeholder="Поиск клиента по имени..." oninput="renderClients()">
+    </div>
+
+    <div class="card" id="client-form-card">
+        <h3 id="form-title">Новый клиент</h3>
+        <input type="hidden" id="edit-client-id">
+        <div class="form-group">
+            <label>ФИО клиента</label>
+            <input type="text" id="c-name" placeholder="Например, Александр">
+        </div>
+        <div class="form-group">
+            <label>Контактный телефон</label>
+            <input type="tel" id="c-phone" placeholder="+7 (999) 000-00-00">
+        </div>
+        
+        <!-- Блок пакета -->
+        <div style="background: rgba(88,101,242,0.1); padding: 12px; border-radius: 8px; border: 1px dashed var(--blurple); margin-bottom: 16px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 14px; color: var(--blurple);">Добавить пакет тренировок</h4>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>Куплено тренировок (шт)</label>
+                <input type="number" id="c-total-sessions" placeholder="Например, 10" style="background: var(--bg-card);">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Сумма оплаты за пакет (₽)</label>
+                <input type="number" id="c-total-paid" placeholder="Например, 25000" style="background: var(--bg-card);">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Заметки о клиенте</label>
+            <textarea id="c-notes" rows="2" placeholder="Ограничения, цели и т.д."></textarea>
+        </div>
+        <button class="btn" id="btn-save-client" onclick="saveClient()">Создать карточку</button>
+        <button class="btn btn-secondary" id="btn-cancel-edit" style="display:none; margin-top: 8px;" onclick="resetClientForm()">Отмена</button>
+    </div>
+
+    <h3>Список подопечных</h3>
+    <div id="clients-list"></div>
+</div>
+
+<!-- ЭКРАН 2: ЗАПИСЬ ТРЕНИРОВКИ -->
+<div id="screen-add-workout" class="screen">
+    <h2>Учёт тренировок</h2>
+    <div class="card">
+        <h3>Добавить занятие</h3>
+        
+        <div class="form-group">
+            <label>Тип тренировки</label>
+            <select id="w-type" onchange="toggleWorkoutType()">
+                <option value="regular">Постоянный клиент (списать с пакета)</option>
+                <option value="guest">Гостевая (разовая)</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="group-client-select">
+            <label>Выберите клиента</label>
+            <select id="w-client-select"></select>
+        </div>
+
+        <div class="form-group" id="group-guest-fields" style="display: none;">
+            <label>Имя гостя</label>
+            <input type="text" id="w-guest-name" placeholder="Иван">
+            
+            <label style="margin-top: 12px;">Результат</label>
+            <select id="w-guest-status" onchange="toggleGuestStatus()">
+                <option value="sold">Продал (провел, взял деньги)</option>
+                <option value="not_sold">Не продал (пробная/бесплатно)</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="group-price" style="display: none;">
+            <label>Стоимость гостевой (₽)</label>
+            <input type="number" id="w-price" placeholder="Введите сумму">
+        </div>
+
+        <div class="form-group">
+            <label>Дата и время проведения</label>
+            <input type="datetime-local" id="w-date">
+        </div>
+        
+        <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; padding: 4px 0; display: none;" id="group-paid-checkbox">
+            <label style="margin-bottom: 0;">Гость оплатил сразу?</label>
+            <input type="checkbox" id="w-paid" checked style="width: 24px; height: 24px; margin: 0;">
+        </div>
+        
+        <div class="form-group">
+            <label>Заметка к занятию</label>
+            <input type="text" id="w-note" placeholder="Качали спину...">
+        </div>
+        <button class="btn" onclick="addWorkout()">Зафиксировать тренировку</button>
+    </div>
+</div>
+
+<!-- ЭКРАН 3: РАСПИСАНИЕ -->
+<div id="screen-schedule" class="screen">
+    <h2>Расписание</h2>
+    <div class="card">
+        <div class="form-group">
+            <label>Выберите день</label>
+            <input type="date" id="schedule-date" onchange="renderSchedule()">
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3 id="schedule-title">Кто был в этот день</h3>
+        <div id="schedule-list"></div>
+    </div>
+</div>
+
+<!-- ЭКРАН 4: ДОХОДЫ -->
+<div id="screen-reports" class="screen">
+    <h2>Доходы</h2>
+    <div class="card" style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <div style="flex: 1;">
+            <select id="report-month" onchange="renderReports()"></select>
+        </div>
+        <div style="flex: 1;">
+            <select id="report-year" onchange="renderReports()"></select>
+        </div>
+    </div>
+
+    <div class="card" style="border: 2px solid var(--green);">
+        <h3 style="color: var(--green); margin-bottom: 4px;">Приход денег (Касса)</h3>
+        <div class="item-row" style="border-bottom: none; padding-bottom: 0;">
+            <span>Всего получено:</span>
+            <b id="rep-received" style="font-size: 24px; color: var(--green);">0 ₽</b>
+        </div>
+        <div class="item-row" style="border-bottom: none; padding-top: 4px;">
+            <span class="muted" style="font-size: 11px;">Гости / Пакеты и ручные:</span>
+            <span class="muted" style="font-size: 11px;" id="rep-received-breakdown">0 ₽ / 0 ₽</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Статистика гостей</h3>
+        <div class="item-row"><span class="muted">Гостевых пришло:</span><b id="rep-guest-count">0</b></div>
+        <div class="item-row"><span class="muted">Из них купили (продал):</span><b id="rep-guest-sold" style="color: var(--green);">0</b></div>
+        <div class="item-row"><span class="muted">Не купили (не продал):</span><b id="rep-guest-fail" style="color: var(--red);">0</b></div>
+    </div>
+
+    <div class="card">
+        <h3>Внести общую оплату (без тренировок)</h3>
+        <div class="form-group">
+            <input type="number" id="manual-cash-amount" placeholder="Сумма (например, 25000)">
+        </div>
+        <button class="btn" style="background-color: var(--blurple);" onclick="addManualCash()">Добавить в кассу</button>
+    </div>
+
+    <div class="card">
+        <h3>История поступлений</h3>
+        <div id="cash-list"></div>
+    </div>
+</div>
+
+<!-- ЭКРАН 5: СПИСАНИЯ -->
+<div id="screen-deductions" class="screen">
+    <h2>Списания тренировок</h2>
+    <div class="card" style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <div style="flex: 1;">
+            <select id="deduct-month" onchange="renderDeductions()"></select>
+        </div>
+        <div style="flex: 1;">
+            <select id="deduct-year" onchange="renderDeductions()"></select>
+        </div>
+    </div>
+
+    <div class="card" style="border: 2px solid var(--blurple);">
+        <h3 style="color: var(--blurple); margin-bottom: 4px;">Отработано</h3>
+        <div class="item-row" style="border-bottom: none; padding-bottom: 0;">
+            <span>Проведено тренировок:</span>
+            <b id="deduct-count" style="font-size: 24px; color: var(--blurple);">0</b>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>История списаний</h3>
+        <div id="deduct-list"></div>
+    </div>
+</div>
+
+<!-- ЭКРАН 6: ПОМОЩЬ -->
+<div id="screen-help" class="screen">
+    <h2>Помощь</h2>
+
+    <div class="card">
+        <h3>📲 Установка приложения на телефон</h3>
+        <div id="install-check-zone" class="install-restrict-banner"></div>
+    </div>
+
+    <div class="card">
+        <h3>🎟️ Пакеты и списания</h3>
+        <p class="help-text">
+            В карточке клиента укажите, сколько тренировок он купил и на какую сумму. Когда вы проводите тренировку на вкладке «Запись», она автоматически списывается с пакета клиента (счетчик уменьшается). Если нужно изменить остаток вручную, нажмите на иконку «✎» рядом со счетчиком.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>💰 Разделение отчетов</h3>
+        <p class="help-text">
+            На вкладке «Доходы» отображаются только реальные деньги, которые вам пришли (оплаты пакетов, гостей и ручные внесения). На вкладке «Списания» отображается, сколько тренировок вы провели за месяц.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>🔒 Безопасность данных</h3>
+        <p class="help-text">
+            База данных изолирована и хранится строго локально на этом устройстве (localStorage).
+        </p>
+        <button class="btn-danger" onclick="clearAllData()">Полная очистка базы данных</button>
+    </div>
+</div>
+
+<!-- НИЖНИЙ ТАББАР -->
+<div class="tabbar">
+    <div class="tab-item active" onclick="switchTab(0, 'screen-clients')">
+        <span class="tab-icon">👥</span><span>Клиенты</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(1, 'screen-add-workout')">
+        <span class="tab-icon">🏋️</span><span>Запись</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(2, 'screen-schedule')">
+        <span class="tab-icon">📅</span><span>Календарь</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(3, 'screen-reports')">
+        <span class="tab-icon">💵</span><span>Доходы</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(4, 'screen-deductions')">
+        <span class="tab-icon">📉</span><span>Списания</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(5, 'screen-help')">
+        <span class="tab-icon">❓</span><span>Помощь</span>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    let clients = JSON.parse(localStorage.getItem('trainer_clients')) || [];
+    let workouts = JSON.parse(localStorage.getItem('trainer_workouts')) || [];
+    let manualCash = JSON.parse(localStorage.getItem('trainer_manual_cash')) || []; 
+
+    // ===== Проверка устройства =====
+    function checkDeviceForInstallation() {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const isIphone = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+        const isStandalone = window.navigator.standalone === true;
+        const zone = document.getElementById('install-check-zone');
+
+        if (isStandalone) {
+            zone.className = 'install-restrict-banner restrict-success';
+            zone.innerHTML = '🎉 Приложение уже успешно установлено!';
+        } else if (isIphone) {
+            zone.className = 'install-restrict-banner restrict-success';
+            zone.innerHTML = 'Вы открыли приложение на iPhone! Нажмите «Поделиться» и выберите «На экран „Домой“».';
+        } else {
+            zone.className = 'install-restrict-banner restrict-error';
+            zone.innerHTML = 'Установка ярлыка на рабочий стол доступна только для iPhone через браузер Safari!';
+        }
+    }
+
+    // ===== Управление формой клиента =====
+    function resetClientForm() {
+        document.getElementById('edit-client-id').value = '';
+        document.getElementById('c-name').value = '';
+        document.getElementById('c-phone').value = '';
+        document.getElementById('c-total-sessions').value = '';
+        document.getElementById('c-total-paid').value = '';
+        document.getElementById('c-notes').value = '';
+        
+        document.getElementById('form-title').innerText = 'Новый клиент';
+        document.getElementById('btn-save-client').innerText = 'Создать карточку';
+        document.getElementById('btn-cancel-edit').style.display = 'none';
+    }
+
+    function editClient(id) {
+        const client = clients.find(c => c.id === id);
+        if (!client) return;
+
+        document.getElementById('edit-client-id').value = client.id;
+        document.getElementById('c-name').value = client.name;
+        document.getElementById('c-phone').value = client.phone || '';
+        document.getElementById('c-total-sessions').value = ''; 
+        document.getElementById('c-total-paid').value = '';
+        document.getElementById('c-notes').value = client.notes || '';
+
+        document.getElementById('form-title').innerText = 'Редактирование';
+        document.getElementById('btn-save-client').innerText = 'Сохранить изменения';
+        document.getElementById('btn-cancel-edit').style.display = 'block';
+        
+        document.getElementById('client-form-card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function saveClient() {
+        const id = document.getElementById('edit-client-id').value;
+        const name = document.getElementById('c-name').value.trim();
+        const phone = document.getElementById('c-phone').value.trim();
+        const totalSessions = parseInt(document.getElementById('c-total-sessions').value) || 0;
+        const totalPaid = parseFloat(document.getElementById('c-total-paid').value) || 0;
+        const notes = document.getElementById('c-notes').value.trim();
+
+        if (!name) return alert('Пожалуйста, введите имя клиента!');
+
+        let clientId = id;
+
+        if (id) {
+            const index = clients.findIndex(c => c.id === id);
+            if (index !== -1) {
+                clients[index] = { ...clients[index], name, phone, notes };
+            }
+        } else {
+            clientId = Date.now().toString();
+            clients.push({ 
+                id: clientId, 
+                name, 
+                phone, 
+                notes,
+                packages: []
+            });
+        }
+
+        if (totalSessions > 0) {
+            const clientObj = clients.find(c => c.id === clientId);
+            if (!clientObj.packages) clientObj.packages = [];
+            
+            clientObj.packages.push({
+                id: Date.now().toString(),
+                sessions: totalSessions,
+                dateAdded: new Date().toISOString(),
+            });
+        }
+
+        if (totalPaid > 0) {
+            const now = new Date();
+            const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            manualCash.push({
+                id: Date.now().toString(),
+                date: localISO,
+                amount: totalPaid,
+                note: 'Пакет (' + totalSessions + ' зан.) от ' + name
+            });
+        }
+
+        saveData();
+        renderClients();
+        updateClientSelectOptions();
+        resetClientForm();
+        alert(id ? 'Данные обновлены!' : 'Клиент создан!');
+    }
+
+    function deleteClient(id) {
+        if (confirm('Удалить клиента? Вся его история тренировок также будет удалена.')) {
+            clients = clients.filter(c => c.id !== id);
+            workouts = workouts.filter(w => w.clientId !== id);
+            saveData();
+            renderClients();
+            updateClientSelectOptions();
+            if (document.getElementById('edit-client-id').value === id) resetClientForm();
+        }
+    }
+
+    // ===== Подсчет остатков пакетов =====
+    function getClientSessionsInfo(clientId) {
+        const client = clients.find(c => c.id === clientId);
+        if (!client) return { total: 0, spent: 0, left: 0 };
+
+        let totalBought = 0;
+        if (client.packages && client.packages.length > 0) {
+            totalBought = client.packages.reduce((sum, pkg) => sum + pkg.sessions, 0);
+        } else {
+            totalBought = client.totalSessions || 0;
+        }
+
+        const spent = workouts.filter(w => w.clientId === clientId && !w.isGuest).length;
+        const left = Math.max(0, totalBought - spent);
+
+        return { total: totalBought, spent, left };
+    }
+
+    // ===== Ручная корректировка остатка =====
+    function editClientBalance(id) {
+        const client = clients.find(c => c.id === id);
+        if (!client) return;
+        
+        const info = getClientSessionsInfo(id);
+        const currentLeft = info.left;
+
+        const newLeftStr = prompt("Введите новое количество оставшихся тренировок:", currentLeft);
+        if (newLeftStr === null) return; // Отмена
+
+        const newLeft = parseInt(newLeftStr);
+        if (isNaN(newLeft) || newLeft < 0) {
+            return alert("Пожалуйста, введите корректное число (0 или больше).");
+        }
+
+        // Разница между новым остатком и текущим
+        const diff = newLeft - currentLeft;
+
+        // Чтобы изменить остаток, мы создаем искусственный пакет (если не хватает) 
+        // или удаляем из последнего пакета (если нужно уменьшить).
+        // Самый простой и безопасный способ — добавить корректирующий пакет:
+        if (diff !== 0) {
+            if (!client.packages) client.packages = [];
+            client.packages.push({
+                id: Date.now().toString(),
+                sessions: diff,
+                dateAdded: new Date().toISOString(),
+                isCorrection: true // Пометка, что это ручная правка
+            });
+            
+            saveData();
+            renderClients();
+            updateClientSelectOptions();
+            alert('Остаток тренировок успешно скорректирован!');
+        }
+    }
+
+    // ===== Запись тренировки =====
+    function toggleWorkoutType() {
+        const type = document.getElementById('w-type').value;
+        const priceGroup = document.getElementById('group-price');
+        const paidCheckbox = document.getElementById('group-paid-checkbox');
+
+        if (type === 'guest') {
+            document.getElementById('group-client-select').style.display = 'none';
+            document.getElementById('group-guest-fields').style.display = 'flex';
+            priceGroup.style.display = 'flex';
+            toggleGuestStatus();
+        } else {
+            document.getElementById('group-client-select').style.display = 'flex';
+            document.getElementById('group-guest-fields').style.display = 'none';
+            priceGroup.style.display = 'none';
+            paidCheckbox.style.display = 'none';
+        }
+    }
+
+    function toggleGuestStatus() {
+        const status = document.getElementById('w-guest-status').value;
+        const paidCheckbox = document.getElementById('group-paid-checkbox');
+
+        if (status === 'not_sold') {
+            paidCheckbox.style.display = 'none';
+        } else {
+            paidCheckbox.style.display = 'flex';
+            document.getElementById('w-paid').checked = true;
+        }
+    }
+
+    function updateClientSelectOptions() {
+        const select = document.getElementById('w-client-select');
+        let html = '<option value="">-- Нажмите для выбора --</option>';
+        clients.forEach(c => {
+            const info = getClientSessionsInfo(c.id);
+            const leftText = info.total > 0 ? ` (осталось: ${info.left})` : '';
+            
+            html += '<option value="' + c.id + '">' + c.name + leftText + '</option>';
+        });
+        select.innerHTML = html;
+    }
+
+    function addWorkout() {
+        const type = document.getElementById('w-type').value;
+        const dateStr = document.getElementById('w-date').value;
+        const note = document.getElementById('w-note').value.trim();
+        const isPaid = document.getElementById('w-paid').checked;
+
+        if (!dateStr) return alert('Укажите дату и время!');
+
+        if (type === 'guest') {
+            const guestName = document.getElementById('w-guest-name').value.trim();
+            const guestStatus = document.getElementById('w-guest-status').value;
+            const price = parseFloat(document.getElementById('w-price').value) || 0;
+            
+            if (!guestName) return alert('Введите имя гостя!');
+
+            workouts.push({
+                id: Date.now().toString(),
+                isGuest: true,
+                guestStatus: guestStatus,
+                clientId: null,
+                clientName: 'Гость: ' + guestName,
+                date: dateStr,
+                isPaid: guestStatus === 'sold' ? isPaid : false,
+                price: guestStatus === 'sold' ? price : 0,
+                note
+            });
+            document.getElementById('w-guest-name').value = '';
+            alert('Гостевая тренировка записана!');
+        } else {
+            const clientId = document.getElementById('w-client-select').value;
+            if (!clientId) return alert('Выберите клиента!');
+
+            const client = clients.find(c => c.id === clientId);
+            if (!client) return;
+
+            const info = getClientSessionsInfo(clientId);
+            if (info.total > 0 && info.left <= 0) {
+                if(!confirm('У клиента закончились тренировки в пакете! Продолжить списание в минус?')) return;
+            }
+
+            workouts.push({
+                id: Date.now().toString(),
+                isGuest: false,
+                clientId,
+                clientName: client.name,
+                date: dateStr,
+                isPaid: true,
+                price: 0,
+                note
+            });
+            alert('Занятие списано с пакета!');
+        }
+
+        document.getElementById('w-note').value = '';
+        saveData();
+        updateClientSelectOptions();
+    }
+
+    // ===== Ручное внесение денег =====
+    function addManualCash() {
+        const amountInput = document.getElementById('manual-cash-amount');
+        const amount = parseFloat(amountInput.value) || 0;
+        
+        if (amount <= 0) return alert('Введите сумму больше нуля!');
+        
+        const now = new Date();
+        const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        
+        manualCash.push({
+            id: Date.now().toString(),
+            date: localISO,
+            amount: amount,
+            note: 'Ручное внесение'
+        });
+        
+        saveData();
+        amountInput.value = '';
+        renderReports();
+        alert('Сумма успешно добавлена в кассу!');
+    }
+
+    function deleteCashEntry(id) {
+        if (confirm('Удалить эту запись о поступлении денег?')) {
+            manualCash = manualCash.filter(c => c.id !== id);
+            saveData();
+            renderReports();
+        }
+    }
+
+    function deleteWorkout(id) {
+        if (confirm('Удалить эту тренировку из истории?')) {
+            workouts = workouts.filter(w => w.id !== id);
+            saveData();
+            renderReports();
+            renderDeductions();
+            renderSchedule();
+            renderClients();
+            updateClientSelectOptions();
+        }
+    }
+
+    function togglePayment(workoutId) {
+        const w = workouts.find(item => item.id === workoutId);
+        if (w && w.isGuest) {
+            if (w.guestStatus === 'sold') {
+                w.guestStatus = 'not_sold';
+                w.isPaid = false;
+                w.price = 0;
+            } else {
+                w.guestStatus = 'sold';
+                w.isPaid = true;
+                let price = prompt("Клиент купил! Введите стоимость тренировки (₽):", "2500");
+                w.price = parseFloat(price) || 2500;
+            }
+            saveData();
+            renderReports();
+            renderSchedule();
+        }
+    }
+
+    function editWorkoutPrompt(id) {
+        const w = workouts.find(item => item.id === id);
+        if (!w) return;
+
+        let newName = prompt("Имя клиента/гостя:", w.clientName.replace('Гость: ', ''));
+        if (newName === null) return; 
+        w.clientName = w.isGuest ? 'Гость: ' + newName : newName;
+
+        let dateStr = w.date; 
+        let newDate = prompt("Дата и время (ГГГГ-ММ-ДДTЧЧ:ММ):", dateStr);
+        if (newDate !== null && newDate !== "") {
+            if (!isNaN(new Date(newDate).getTime())) {
+                w.date = newDate;
+            }
+        }
+
+        let newNote = prompt("Заметка к тренировке:", w.note || "");
+        if (newNote !== null) w.note = newNote;
+
+        saveData();
+        renderSchedule();
+        renderReports();
+        renderDeductions();
+    }
+
+    // ===== Отрисовка клиентов =====
+    function renderClients() {
+        const search = document.getElementById('search-input').value.trim().toLowerCase();
+        const listDiv = document.getElementById('clients-list');
+        listDiv.innerHTML = '';
+
+        if (clients.length === 0) {
+            listDiv.innerHTML = '<p class="muted">База клиентов пока пуста.</p>';
+            return;
+        }
+
+        let hasMatches = false;
+        clients.forEach(c => {
+            if (c.name.toLowerCase().includes(search)) {
+                hasMatches = true;
+                
+                const info = getClientSessionsInfo(c.id);
+                
+                let leftSessionsHtml = '';
+                if (info.total > 0 || info.left > 0) {
+                    let leftColor = info.left > 3 ? 'var(--text-main)' : (info.left > 0 ? 'var(--yellow)' : 'var(--red)');
+                    leftSessionsHtml = `<div style="margin-top:4px; font-size: 13px; display:flex; align-items:center;">
+                        Куплено: <b>${info.total}</b> | Осталось: <b style="color:${leftColor}; font-size: 15px; margin:0 4px;">${info.left}</b>
+                        <button class="action-btn" onclick="editClientBalance('${c.id}')" title="Изменить остаток" style="margin-left:4px; padding:0 4px; font-size:16px;">✎</button>
+                    </div>`;
+                } else {
+                    leftSessionsHtml = `<div style="margin-top:4px; font-size: 13px; display:flex; align-items:center;">
+                        <span style="color: var(--red);">Нет активного пакета</span>
+                        <button class="action-btn" onclick="editClientBalance('${c.id}')" title="Добавить тренировки" style="margin-left:4px; padding:0 4px; font-size:16px;">✎</button>
+                    </div>`;
+                }
+
+                let notesHtml = '';
+                if (c.notes) notesHtml = '<div class="muted" style="margin-top:6px;">Заметки: ' + c.notes + '</div>';
+
+                listDiv.innerHTML +=
+                    '<div class="card">' +
+                        '<div style="display:flex; justify-content:space-between; align-items:flex-start;">' +
+                            '<div>' +
+                                '<b style="font-size:16px;">' + c.name + '</b><br>' +
+                                '<span class="muted">Тел: ' + (c.phone || 'не указан') + '</span>' +
+                                leftSessionsHtml +
+                            '</div>' +
+                            '<div style="text-align:right;">' +
+                                '<button class="action-btn" onclick="editClient(\'' + c.id + '\')">Ред.</button>' +
+                                '<button class="action-btn delete" onclick="deleteClient(\'' + c.id + '\')">Удалить</button>' +
+                            '</div>' +
+                        '</div>' +
+                        notesHtml +
+                        '<div class="item-row" style="margin-top:8px;">' +
+                            '<span class="muted">Всего проведено: ' + info.spent + '</span>' +
+                        '</div>' +
+                    '</div>';
+            }
+        });
+
+        if (!hasMatches) {
+            listDiv.innerHTML = '<p class="muted">По запросу ничего не найдено.</p>';
+        }
+    }
+
+    // ===== Отрисовка расписания =====
+    function renderSchedule() {
+        const dateInput = document.getElementById('schedule-date').value;
+        const listDiv = document.getElementById('schedule-list');
+        listDiv.innerHTML = '';
+        
+        if (!dateInput) return;
+        const selectedDateStr = dateInput; 
+        
+        const dayWorkouts = workouts.filter(w => w.date.startsWith(selectedDateStr));
+        dayWorkouts.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        if (dayWorkouts.length === 0) {
+            listDiv.innerHTML = '<p class="muted">В этот день тренировок не было.</p>';
+            return;
+        }
+
+        dayWorkouts.forEach(w => {
+            const wDate = new Date(w.date);
+            const timeStr = wDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            
+            let badgeHtml = '';
+            if (w.isGuest) {
+                badgeHtml = w.guestStatus === 'sold' 
+                    ? `<span class="badge guest" style="font-size:9px; cursor:pointer;" onclick="togglePayment('${w.id}')" title="Нажмите, чтобы изменить">Гость (Продал)</span>`
+                    : `<span class="badge guest-fail" style="font-size:9px; cursor:pointer;" onclick="togglePayment('${w.id}')" title="Нажмите, чтобы изменить">Гость (Не продал)</span>`;
+            } else {
+                badgeHtml = `<span class="badge paid" style="font-size:9px;">Списано с пакета</span>`;
+            }
+
+            let noteHtml = w.note ? `<div class="muted" style="margin-top:2px;">${w.note}</div>` : '';
+
+            listDiv.innerHTML +=
+                '<div class="item-row">' +
+                    '<div>' +
+                        '<b style="color: var(--blurple); font-size: 16px;">' + timeStr + '</b><br>' +
+                        '<span style="font-size: 16px; font-weight: 600;">' + w.clientName + '</span> ' + badgeHtml +
+                        noteHtml +
+                    '</div>' +
+                    '<div style="display:flex; align-items:center;">' +
+                        '<button class="action-btn" onclick="editWorkoutPrompt(\'' + w.id + '\')" title="Редактировать">✎</button>' +
+                        '<button class="action-btn delete" onclick="deleteWorkout(\'' + w.id + '\')" title="Удалить">✖</button>' +
+                    '</div>' +
+                '</div>';
+        });
+    }
+
+    // ===== Отчёты (Доходы) =====
+    function renderReports() {
+        const month = parseInt(document.getElementById('report-month').value);
+        const year = parseInt(document.getElementById('report-year').value);
+        const listDiv = document.getElementById('cash-list');
+        listDiv.innerHTML = '';
+
+        let cashFromGuests = 0; 
+        let cashManual = 0;       
+
+        let guestTotal = 0;
+        let guestSold = 0;
+        let guestFail = 0;
+
+        let historyItems = [];
+
+        workouts.forEach(w => {
+            const wDate = new Date(w.date);
+            if (wDate.getMonth() + 1 === month && wDate.getFullYear() === year) {
+                if (w.isGuest) {
+                    guestTotal++;
+                    if (w.guestStatus === 'sold') {
+                        guestSold++;
+                        cashFromGuests += w.price;
+                        if (w.isPaid) {
+                            historyItems.push({ type: 'guest_cash', date: w.date, data: w });
+                        }
+                    } else {
+                        guestFail++;
+                    }
+                }
+            }
+        });
+
+        manualCash.forEach(c => {
+            const cDate = new Date(c.date);
+            if (cDate.getMonth() + 1 === month && cDate.getFullYear() === year) {
+                cashManual += c.amount;
+                historyItems.push({ type: 'cash', date: c.date, data: c });
+            }
+        });
+
+        historyItems.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        historyItems.forEach(item => {
+            const itemDate = new Date(item.date);
+            const formattedDate = itemDate.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+            if (item.type === 'guest_cash') {
+                const w = item.data;
+                listDiv.innerHTML +=
+                    '<div class="item-row">' +
+                        '<div>' +
+                            '<b>' + w.clientName + '</b> <span class="badge guest" style="font-size:9px;">Гость (Продал)</span><br>' +
+                            '<span class="muted">' + formattedDate + '</span>' +
+                        '</div>' +
+                        '<div style="text-align:right; display:flex; align-items:center; gap:4px;">' +
+                            '<div>' +
+                                '<b style="display:inline-block; font-size: 16px; margin-top: 4px; color: var(--green);">+' + w.price + ' ₽</b>' +
+                            '</div>' +
+                            '<button class="action-btn delete" onclick="deleteWorkout(\'' + w.id + '\')" title="Удалить">✖</button>' +
+                        '</div>' +
+                    '</div>';
+            } else {
+                listDiv.innerHTML +=
+                    '<div class="item-row">' +
+                        '<div>' +
+                            '<b style="color:var(--blurple);">' + (item.data.note || 'Оплата блока') + '</b><br>' +
+                            '<span class="muted">' + formattedDate + '</span>' +
+                        '</div>' +
+                        '<div style="text-align:right; display:flex; align-items:center; gap:4px;">' +
+                            '<div>' +
+                                '<b style="margin-top:4px; display:inline-block; color:var(--green); font-size: 16px;">+' + item.data.amount + ' ₽</b>' +
+                            '</div>' +
+                            '<button class="action-btn delete" onclick="deleteCashEntry(\'' + item.data.id + '\')" title="Удалить">✖</button>' +
+                        '</div>' +
+                    '</div>';
+            }
+        });
+
+        if (historyItems.length === 0) {
+            listDiv.innerHTML = '<p class="muted">Нет поступлений за этот период.</p>';
+        }
+
+        const totalReceived = cashFromGuests + cashManual;
+        
+        document.getElementById('rep-received').innerText = totalReceived + ' ₽';
+        document.getElementById('rep-received-breakdown').innerText = cashFromGuests + ' ₽ / ' + cashManual + ' ₽';
+        
+        document.getElementById('rep-guest-count').innerText = guestTotal;
+        document.getElementById('rep-guest-sold').innerText = guestSold;
+        document.getElementById('rep-guest-fail').innerText = guestFail;
+    }
+
+    // ===== Списания =====
+    function renderDeductions() {
+        const month = parseInt(document.getElementById('deduct-month').value);
+        const year = parseInt(document.getElementById('deduct-year').value);
+        const listDiv = document.getElementById('deduct-list');
+        listDiv.innerHTML = '';
+
+        let count = 0;
+        let historyItems = [];
+
+        workouts.forEach(w => {
+            const wDate = new Date(w.date);
+            if (wDate.getMonth() + 1 === month && wDate.getFullYear() === year && !w.isGuest) {
+                count++;
+                historyItems.push({ type: 'workout', date: w.date, data: w });
+            }
+        });
+
+        historyItems.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        historyItems.forEach(item => {
+            const w = item.data;
+            const itemDate = new Date(item.date);
+            const formattedDate = itemDate.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+            
+            let noteHtml = w.note ? '<span class="muted" style="margin-left:6px;">"' + w.note + '"</span>' : '';
+
+            listDiv.innerHTML +=
+                '<div class="item-row">' +
+                    '<div>' +
+                        '<b>' + w.clientName + '</b><br>' +
+                        '<span class="muted">' + formattedDate + '</span>' + noteHtml +
+                    '</div>' +
+                    '<div style="text-align:right; display:flex; align-items:center; gap:4px;">' +
+                        '<div>' +
+                            '<b style="display:inline-block; font-size: 14px; margin-top: 4px; color: var(--blurple);">-1 зан.</b>' +
+                        '</div>' +
+                        '<button class="action-btn delete" onclick="deleteWorkout(\'' + w.id + '\')" title="Удалить">✖</button>' +
+                    '</div>' +
+                '</div>';
+        });
+
+        if (historyItems.length === 0) {
+            listDiv.innerHTML = '<p class="muted">Нет списаний за этот период.</p>';
+        }
+
+        document.getElementById('deduct-count').innerText = count;
+    }
+
+    // ===== Навигация и сохранение =====
+    function switchTab(index, screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        document.querySelectorAll('.tab-item')[index].classList.add('active');
+
+        if (screenId === 'screen-clients') renderClients();
+        if (screenId === 'screen-add-workout') updateClientSelectOptions();
+        if (screenId === 'screen-schedule') renderSchedule();
+        if (screenId === 'screen-reports') renderReports();
+        if (screenId === 'screen-deductions') renderDeductions();
+        if (screenId === 'screen-help') checkDeviceForInstallation();
+    }
+
+    function saveData() {
+        localStorage.setItem('trainer_clients', JSON.stringify(clients));
+        localStorage.setItem('trainer_workouts', JSON.stringify(workouts));
+        localStorage.setItem('trainer_manual_cash', JSON.stringify(manualCash));
+    }
+
+    function clearAllData() {
+        if (confirm('Удалить ВСЕХ клиентов, ВСЮ историю тренировок и ВСЮ кассу?')) {
+            localStorage.removeItem('trainer_clients');
+            localStorage.removeItem('trainer_workouts');
+            localStorage.removeItem('trainer_manual_cash');
+            clients = [];
+            workouts = [];
+            manualCash = [];
+            resetClientForm();
+            updateClientSelectOptions();
+            switchTab(0, 'screen-clients');
+        }
+    }
+
+    // ===== Инициализация =====
+    const mSelect = document.getElementById('report-month');
+    const ySelect = document.getElementById('report-year');
+    const dmSelect = document.getElementById('deduct-month');
+    const dySelect = document.getElementById('deduct-year');
+    
+    const currentDate = new Date();
+    const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+
+    for (let i = 1; i <= 12; i++) {
+        const opt = '<option value="' + i + '" ' + (i === currentDate.getMonth() + 1 ? 'selected' : '') + '>' + monthNames[i - 1] + '</option>';
+        mSelect.innerHTML += opt;
+        dmSelect.innerHTML += opt;
+    }
+    const currentYear = currentDate.getFullYear();
+    for (let i = currentYear - 1; i <= currentYear + 3; i++) {
+        const opt = '<option value="' + i + '" ' + (i === currentYear ? 'selected' : '') + '>' + i + ' год</option>';
+        ySelect.innerHTML += opt;
+        dySelect.innerHTML += opt;
+    }
+
+    const localISO = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('w-date').value = localISO;
+    document.getElementById('schedule-date').value = localISO.slice(0, 10);
+
+    renderClients();
+    updateClientSelectOptions();
+    renderSchedule();
+    renderReports();
+    renderDeductions();
+    checkDeviceForInstallation();
+
+    // Экспорт функций
+    window.saveClient = saveClient;
+    window.editClient = editClient;
+    window.deleteClient = deleteClient;
+    window.resetClientForm = resetClientForm;
+    window.editClientBalance = editClientBalance;
+    window.addWorkout = addWorkout;
+    window.deleteWorkout = deleteWorkout;
+    window.deleteCashEntry = deleteCashEntry;
+    window.togglePayment = togglePayment;
+    window.editWorkoutPrompt = editWorkoutPrompt;
+    window.toggleWorkoutType = toggleWorkoutType;
+    window.toggleGuestStatus = toggleGuestStatus;
+    window.addManualCash = addManualCash;
+    window.renderClients = renderClients;
+    window.renderReports = renderReports;
+    window.renderDeductions = renderDeductions;
+    window.renderSchedule = renderSchedule;
+    window.switchTab = switchTab;
+    window.clearAllData = clearAllData;
+});
+</script>
+</body>
+</html>
